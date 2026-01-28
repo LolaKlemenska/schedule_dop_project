@@ -1,0 +1,51 @@
+import pandas as pd
+
+def wczytaj_umiejetnosci(sciezka_pliku: str) -> pd.DataFrame:
+    """Wczytuje dane o umiejętnościach pracowników z pliku Excel."""
+    try:
+        df = pd.read_excel(sciezka_pliku, header = [0,1,2], index_col = 0).fillna(0)
+    except Exception as e:
+        raise IOError(f"Błąd przy wczytywaniu pliku umiejętności: {e}")
+    df = df.reset_index().rename(columns={'index': 'pracownik'})
+    df.columns = ['pracownik'] + [f"{i}_{j}_{k}" for i,j,k in df.columns[1:]]
+    df_tidy = df.melt(id_vars='pracownik', var_name='temp', value_name='udział')
+    df_tidy[['specjalizacja','nazwa_zajec','rola']] = df_tidy['temp'].str.split('_', expand=True)
+    df_tidy = df_tidy.drop(columns='temp')
+
+
+    df_tidy = df_tidy[['pracownik','specjalizacja','nazwa_zajec','rola','udział']]
+    #walidacja_wczytanych_danych(df, typ='umiejetnosci')
+    return df_tidy
+
+def wczytaj_rozklad_zajec(sciezka_pliku: str) -> pd.DataFrame:
+    """Wczytuje rozkład zajęć na dany tydzień z pliku Excel."""
+    try:
+        raw = pd.read_excel(sciezka_pliku)
+    except Exception as e:
+        raise IOError(f"Błąd przy wczytywaniu rozkładu zajęć: {e}")
+
+    raw = raw.rename(columns={raw.columns[0]: "czas"})
+    dni = ["pn", "wt", "śr", "czw", "pt"]
+
+    raw["dzien"] = raw["czas"].where(raw["czas"].isin(dni))
+    raw["dzien"] = raw["dzien"].ffill()
+    raw = raw[~raw["czas"].isin(dni)]
+    raw = raw.drop(index=0)
+    df = raw.melt(
+    id_vars=["dzien", "czas"],  # kolumny, które zostają bez zmian
+    value_name="nazwa_zajec",  # jak ma się nazywać nowa kolumna z wartościami
+    var_name="sala"             # jak ma się nazywać nowa kolumna z nazwami kolumn
+    )
+    #walidacja_wczytanych_danych(df, typ='rozklad')
+    return df
+
+
+def wczytaj_dyspozycyjnosc(sciezka_pliku: str) -> pd.DataFrame:
+    """Wczytuje informacje o dyspozycyjności pracowników z pliku Excel i zwraca w formacie długim."""
+    # Wczytanie z pominięciem 2 wierszy nagłówka
+    df = pd.read_excel(sciezka_pliku,
+                       skiprows=2, header=[0, 1])
+
+    df = df.iloc[:, 1:-1]
+    df = df.iloc[:-1, :]
+    return df
