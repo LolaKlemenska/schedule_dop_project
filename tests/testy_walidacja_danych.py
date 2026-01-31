@@ -219,5 +219,40 @@ class TestWalidacjaDanych:
         assert not sprawdz_kolumny(df)
 
 
+    def test_sprawdz_kolumny9(self):
+        # sprawdza czy sprawdz_kolumny zawraca False, gdy na zerowym miejscu w liście z nazwami kolumn niepoprawnie wpisane są nazwy wierszy
+        columns = [('dzień mieiąca', 'dzień tygodnia'),
+                   (1, 'cz'),
+                   (2, 'pt'),
+                   (3, 'sb'),
+                   (4, 'nd'),
+                   (5, 'pn'),
+                   (6, 'wt'),
+                   (8, 'śr'),
+                   (7, 'cz'),
+                   (9, 'pt'),
+                   (10, 'sb'),
+                   (11, 'nd'),
+                   (12, 'pn'),
+                   (13, 'wt'),
+                   (15, 'śr'),
+                   (14, 'cz'),
+                   (16, 'pt'),
+                   (17, 'sb'),
+                   (18, 'nd'),
+                   (20, 'pn'),
+                   (19, 'wt'),
+                   (21, 'śr'),
+                   (22, 'cz'),
+                   (23, 'pt'),
+                   (24, 'sb'),
+                   (25, 'nd'),
+                   (26, 'pn'),
+                   (27, 'wt'),
+                   (28, 'śr'),
+                   (29, 'cz'),
+                   (30, 'pt')]
 
+        df = pd.DataFrame(columns=columns)
+        assert not sprawdz_kolumny(df)
 
