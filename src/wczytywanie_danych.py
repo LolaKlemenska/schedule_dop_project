@@ -69,7 +69,7 @@ def wczytaj_dyspozycyjnosc(sciezka_pliku: str) -> pd.DataFrame:
 
                 # tylko liczby dni
                 if isinstance(dzien, (int, float)):
-                    pracownik_col.append(pracownik)
+                    pracownik_col.append(pracownik.lower())
                     dzien_miesiaca.append(int(dzien))
                     dzien_tygodnia.append(tydz)
                     godziny.append(godz)
