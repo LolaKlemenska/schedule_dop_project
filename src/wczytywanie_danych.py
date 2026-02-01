@@ -42,10 +42,41 @@ def wczytaj_rozklad_zajec(sciezka_pliku: str) -> pd.DataFrame:
 
 def wczytaj_dyspozycyjnosc(sciezka_pliku: str) -> pd.DataFrame:
     """Wczytuje informacje o dyspozycyjności pracowników z pliku Excel i zwraca w formacie długim."""
-    # Wczytanie z pominięciem 2 wierszy nagłówka
-    df = pd.read_excel(sciezka_pliku,
-                       skiprows=2, header=[0, 1])
+    df = pd.read_excel(
+        sciezka_pliku,
+        skiprows=2,
+        header=[0, 1]
+    )
 
     df = df.iloc[:, 1:-1]
     df = df.iloc[:-1, :]
-    return df
+    df = df.fillna(0)
+
+    pracownicy = df[("dzień miesiąca", "dzień tygodnia")]
+    df_dni = df.iloc[:, 1:]
+
+    pracownik_col = []
+    dzien_miesiaca = []
+    dzien_tygodnia = []
+    godziny = []
+
+    for i, pracownik in enumerate(pracownicy):
+        for j in range(df_dni.shape[1]):
+            godz = df_dni.iloc[i, j]
+            if godz != 0:
+                dzien = df_dni.columns[j][0]
+                tydz = df_dni.columns[j][1]
+
+                # tylko liczby dni
+                if isinstance(dzien, (int, float)):
+                    pracownik_col.append(pracownik)
+                    dzien_miesiaca.append(int(dzien))
+                    dzien_tygodnia.append(tydz)
+                    godziny.append(godz)
+
+    return pd.DataFrame({
+        "pracownik": pracownik_col,
+        "dzień_miesiąca": dzien_miesiaca,
+        "dzień_tygodnia": dzien_tygodnia,
+        "godziny": godziny
+    })
