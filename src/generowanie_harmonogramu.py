@@ -1,49 +1,42 @@
 import pandas as pd
 from collections import defaultdict
 
-def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec: pd.DataFrame, df_dyspozycyjnosc: pd.DataFrame):
+def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.DataFrame, df_dyspozycyjnosc: pd.DataFrame):
     '''
-    Przerabia DataFrame'y na słowniki.
+    Przerabia DataFrame'y na prostsze struktury danych.
 
     Zwraca:
-    dict_rozkład_zajec: słownik gdzie kluczami są dni tygodnia.
-    Pod każdym kluczem jest kolejny słownik o strukturze:
-     - godzina
-        - sala
-        - nazwa_zajec
-    dict_umiejetnosci: słownik, gdzie kluczami są numery pracowników. Pod każdym kluczem jest kolejny słownik z kluczami: 'specjalizacja', 'nazwa_zajec', 'rola', 'udział'.
-    dict_dyspozycyjnosc: słownik, gdzie kluczami są dni miesiąca. Pod każdym dniem miesiąca jest słownik o nastepującej strukturze:
-    - dzień_miesiąca
-        - dzień tygodnia
-        - 'pracownicy' (każdy dzień miesiąca zawiera słownik z kluczem 'pracownicy')
-            - pracownik: godziny
+    zajecia: lista zawierająca słowniki z kluczami id, dzien, czas, sala, nazwa_zajec
+    umiejetnosci: set((pracownik, nazwa_zajęć, rola))
+    dyspozycyjnosc = set((pracownik, dzień_miesiąca, godziny))
+
+
     '''
 
-    dict_rozkład_zajec = defaultdict(dict)
-    for _, row in df_rozklad_zajec.iterrows():
-        dict_rozkład_zajec[row['dzien_tygodnia']][row['czas']] = {
-                                 'sala': row['sala'],
-                                 'nazwa_zajec': row['nazwa_zajec']
-        }
+    #zajecia = [{id, dzien, czas, sala, nazwa_zajęć}]
+    zajecia = []
+    for i, row in df_rozklad_zajec_miesiac.iterrows():
+        zajecia.append(
+            {'id': i,
+             'dzien_miesiaca' : row['dzien_miesiaca'],
+             'dzien_tygodnia': row['dzien_tygodnia'],
+             'czas': row['czas'],
+             'sala' : row['sala'],
+             'nazwa_zajec': row['nazwa_zajec'],}
+        )
 
-    dict_umiejetnosci = defaultdict(dict)
-    for _, row in df_umiejetnosci.iterrows():
-        dict_umiejetnosci[row['pracownik']] = {
-            'specjalizacja': row['specjalizacja'],
-            'nazwa_zajec': row['nazwa_zajec'],
-            'rola': row['rola'],
-            'udział': row['udział']
-        }
 
-    dict_dyspozycyjnosc = defaultdict(lambda: defaultdict(dict))
-    for i, row in df_dyspozycyjnosc.iterrows():
-        dict_dyspozycyjnosc[row['dzień_miesiąca']]['dzień_tygodnia'] = row['dzień_tygodnia']
-        dict_dyspozycyjnosc[row['dzień_miesiąca']]['pracownicy'][row['pracownik']] = row['godziny']
+    #umiejetnosci = set(pracownik, nazwa_zajęć, rola)
+    umiejetnosci = set((row['pracownik'], row['nazwa_zajec'], row['rola'])
+        for _, row in df_umiejetnosci.iterrows()
+        if row['udział'] == 1)
 
-    for k, v in dict_dyspozycyjnosc.items():
-        dict_dyspozycyjnosc[k] = dict(v)
 
-    return dict(dict_umiejetnosci), dict(dict_rozkład_zajec), dict(dict_dyspozycyjnosc)
+    #dyspozycyjnosc = set(pracownik, dzień_miesiąca, godziny)
+    dyspozycyjnosc = set((row['pracownik'], row['dzień_miesiąca'], row['godziny'])
+                         for _,row in df_dyspozycyjnosc.iterrows())
+
+    return umiejetnosci, zajecia, dyspozycyjnosc
 
 def generuj_osobnika(umiejetnosci: pd.DataFrame, rozklad_zajec: pd.DataFrame, dyspozycyjnosc: pd.DataFrame) :
     pass
