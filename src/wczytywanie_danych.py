@@ -92,5 +92,30 @@ def wczytaj_kalendarz(sciezka_pliku: str) -> pd.DataFrame:
     df = df.iloc[0:2,2:-1].T
     df = df.reset_index(drop=True)
     df = df.rename(columns={0 : 'dzien_miesiaca', 1 : 'dzien_tygodnia'})
+    df["dzien_tygodnia"] = df["dzien_tygodnia"].replace({"cz": "czw"})
 
     return df
+
+def wczytaj_rozklad_zajec_miesiac(sciezka_pliku_rozklad_zajec: str, sciezka_pliku_grafik: str) -> pd.DataFrame:
+    '''
+    Tworzy Dataframe będący rozkładem zajęc na cały miesiąc.
+    Kombinacje dni misiąca i tygodnia brane są z dyspozycyjnośici pracowników.
+    '''
+    df_rozklad = wczytaj_rozklad_zajec(sciezka_pliku_rozklad_zajec)
+    df_kalendarz = wczytaj_kalendarz(sciezka_pliku_grafik)
+
+    df_final = (
+        df_kalendarz
+        .merge(
+            df_rozklad,
+            left_on="dzien_tygodnia",
+            right_on="dzien",
+            how="left"
+        )
+        .drop(columns="dzien")
+        .dropna(subset=["nazwa_zajec"])
+        .sort_values(["dzien_miesiaca", "czas"])
+        .reset_index(drop=True)
+    )
+
+    return df_final
