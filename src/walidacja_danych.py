@@ -1,7 +1,7 @@
-from pandas.core.interchange.dataframe_protocol import DataFrame
+import pandas as pd
 
 
-def sprawdz_kolumny(df: DataFrame) -> bool:
+def sprawdz_kolumny(df: pd.DataFrame) -> bool:
     dozwolone_schematy = [['pracownik', 'specjalizacja', 'nazwa_zajec', 'rola', 'udział'],
                           ['dzien', 'czas', 'sala', 'nazwa_zajec']]
 
@@ -25,5 +25,17 @@ def sprawdz_kolumny(df: DataFrame) -> bool:
     #print('Final False')
     return False
 
+def sprawdz_NaN(df: pd.DataFrame, nazwa: str = "DataFrame") -> list[str]:
+    """Sprawdza występowanie wartości NaN."""
+    bledy = []
 
+    nan_cols = df.columns[df.isna().any()]
+    for col in nan_cols:
+        liczba = df[col].isna().sum()
+        bledy.append(
+            f"[{nazwa}] Kolumna '{col}' zawiera {liczba} wartości NaN."
+        )
+    if bledy == []:
+        return None
+    return bledy
 
