@@ -59,7 +59,7 @@ def sprawdz_kolumny_i_typy(df: pd.DataFrame) -> list[str]:
 
     SCHEMAT_TYPY = {
     "umiejetnosci": {
-        "pracownik": str,
+        "pracownik": int,
         "specjalizacja": str,
         "nazwa_zajec": str,
         "rola": str,
@@ -72,10 +72,10 @@ def sprawdz_kolumny_i_typy(df: pd.DataFrame) -> list[str]:
         "nazwa_zajec": str
     },
     "dyspozycyjnosc": {
-        "pracownik": str,
+        "pracownik": int,
         "dzień_miesiąca": int,
         "dzień_tygodnia": str,
-        "godziny": (int, float)
+        "godziny": str
     },
     "rozklad_miesiac": {
         "dzien_miesiaca": int,
