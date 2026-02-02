@@ -1,14 +1,17 @@
+import datetime
+import random
+from random import choice
+import numpy as np
 import pandas as pd
-from collections import defaultdict
 
 def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.DataFrame, df_dyspozycyjnosc: pd.DataFrame):
     '''
     Przerabia DataFrame'y na prostsze struktury danych.
 
     Zwraca:
-    zajecia: lista zawierająca słowniki z kluczami id, dzien, czas, sala, nazwa_zajec
+    zajecia: lista zawierająca słowniki z kluczami id, dzien_miesiaca, dzien_tygodnia, czas, sala, nazwa_zajec
     umiejetnosci: set((pracownik, nazwa_zajęć, rola))
-    dyspozycyjnosc = set((pracownik, dzień_miesiąca, godziny))
+    dyspozycyjnosc: set((pracownik, dzień_miesiąca, godziny))
 
 
     '''
@@ -36,7 +39,56 @@ def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.D
     dyspozycyjnosc = set((row['pracownik'], row['dzień_miesiąca'], row['godziny'])
                          for _,row in df_dyspozycyjnosc.iterrows())
 
-    return umiejetnosci, zajecia, dyspozycyjnosc
+    id_pracownikow = df_dyspozycyjnosc['pracownik'].unique()
 
-def generuj_osobnika(umiejetnosci: pd.DataFrame, rozklad_zajec: pd.DataFrame, dyspozycyjnosc: pd.DataFrame) :
-    pass
+    return umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow
+
+
+def generuj_liste_dostepnych_prac(dzien, godzina, dyspozycyjnosc, pracownicy):
+    '''Zwraca listę pracowników dostępnych w danym dniu miesiąca'''
+    #5_1 oznacza pierwszą połowę dnia (8:15-13:15), a 5_2 drugą połowę dnia (13:15-18:15).
+    dostepni = []
+    for id_prac in pracownicy:
+        id_prac = int(id_prac)
+        if (id_prac, dzien, 10) in dyspozycyjnosc:
+            dostepni.append(id_prac)
+        elif (id_prac, dzien, '5_1') in dyspozycyjnosc:
+            if datetime.time(8,0) <= godzina <= datetime.time(11,0):
+                dostepni.append(id_prac)
+        elif (id_prac, dzien, '5_2') in dyspozycyjnosc:
+            if datetime.time(13,0) <= godzina <= datetime.time(16,0):
+                dostepni.append(id_prac)
+    return dostepni
+
+def generuj_liste_kompetentnych_pracowników(pracownicy, nazwa_zajec, rola, umiejetnosci):
+    kompetentni = []
+    for id_prac in pracownicy:
+        if (id_prac, nazwa_zajec, rola) in umiejetnosci:
+            kompetentni.append(id_prac)
+    return kompetentni
+
+
+def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list):
+    osobnik = []
+    for zajecia in rozklad_zajec_miesiac:
+        dostepni = generuj_liste_dostepnych_prac(zajecia['dzien_miesiaca'], zajecia['czas'], dyspozycyjnosc, id_pracownikow)
+        kompetetni_prow = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'prowadzenie', umiejetnosci)
+        kompetetni_asys = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'asysta', umiejetnosci)
+        if not dostepni:
+            osobnik.append(()) #nikt nie pracuje w danym dniu
+        if dostepni and not kompetetni_prow:
+            raise ValueError(
+                f'Bark kompetentnych prowadzących dla zajęć'
+                f'{zajecia["nazwa_zajec"]} dnia'
+                f'{zajecia["dzien_miesiaca"], zajecia["czas"]}.')
+        if dostepni and not kompetetni_asys:
+            raise ValueError(
+                f'Bark kompetentnych asystujących dla zajęć'
+                f'{zajecia["nazwa_zajec"]} dnia'
+                f'{zajecia["dzien_miesiaca"], zajecia["czas"]}.')
+        else:
+            prow = random.choice(kompetetni_prow)
+            asys = random.choice(kompetetni_asys)
+            osobnik.append((prow, asys))
+    return osobnik
+
