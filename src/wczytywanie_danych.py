@@ -80,3 +80,17 @@ def wczytaj_dyspozycyjnosc(sciezka_pliku: str) -> pd.DataFrame:
         "dzień_tygodnia": dzien_tygodnia,
         "godziny": godziny
     })
+
+def wczytaj_kalendarz(sciezka_pliku: str) -> pd.DataFrame:
+    """Wczytuje kalendarz danego miesiąca z pliku Excel zawierającego dyspozycyjność pracowników"""
+    df = pd.read_excel(
+        sciezka_pliku,
+        skiprows=2,
+        header=None
+    )
+
+    df = df.iloc[0:2,2:-1].T
+    df = df.reset_index(drop=True)
+    df = df.rename(columns={0 : 'dzien_miesiaca', 1 : 'dzien_tygodnia'})
+
+    return df
