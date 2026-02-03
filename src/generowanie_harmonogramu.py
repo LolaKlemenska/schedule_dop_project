@@ -5,6 +5,9 @@ from random import choice
 import numpy as np
 import pandas as pd
 
+Osobnik = list[tuple[int,int]]
+Populacja = list[Osobnik]
+
 def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.DataFrame, df_dyspozycyjnosc: pd.DataFrame):
     '''
     Przerabia DataFrame'y na prostsze struktury danych.
@@ -17,7 +20,7 @@ def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.D
 
     '''
 
-    #zajecia = [{id, dzien, czas, sala, nazwa_zajęć}]
+    #zajecia = [{id, dzien_miesiaca, dzien_tygodnia, czas, sala, nazwa_zajęć}]
     zajecia = []
     for i, row in df_rozklad_zajec_miesiac.iterrows():
         zajecia.append(
@@ -69,7 +72,7 @@ def generuj_liste_kompetentnych_pracowników(pracownicy, nazwa_zajec, rola, umie
     return kompetentni
 
 
-def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list):
+def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list) -> Osobnik:
     osobnik = []
     zajetosci = defaultdict(set) # (dzien, czas) -> {pracownicy}; zapamiętuje, którzy pracownicy w danym dniu o danej godzinie są zajęci
 
@@ -102,13 +105,44 @@ def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjno
         osobnik.append((prow, asys))
     return osobnik
 
-def generuj_populacje(rozmiar: int, umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list):
+def generuj_populacje(rozmiar: int, umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list) -> Populacja:
     populacja = []
     for i in range(rozmiar):
         osobnik = generuj_osobnika(umiejetnosci, rozklad_zajec_miesiac, dyspozycyjnosc, id_pracownikow)
         populacja.append(osobnik)
     return populacja
 
+def policz_obciazenie_pracownikow(id_pracownikow: list[int], harmonogram: Osobnik) -> dict[int, int]:
+    obciazenie = {id: 0 for id in id_pracownikow}
+    for p1, p2 in harmonogram:
+        if p1 != -1:
+            obciazenie[p1] += 1
+        if p2 != -1:
+            obciazenie[p2] += 1
+
+    return obciazenie
+
+
+def fitness(osobnik: Osobnik, id_pracownikow: list):
+
+    fitness = 0
+
+    #Równomierne obciążenie pracowników
+    obciazenie_pracownikow = policz_obciazenie_pracownikow(id_pracownikow, osobnik)
+    sred_obciazenie = (sum(obciazenie_pracownikow.values()) / len(id_pracownikow))
+    kara_rownomierne_obciazenie = sum(abs(p - sred_obciazenie) for p in obciazenie_pracownikow)
+    fitness -= 1 * kara_rownomierne_obciazenie
+
+
+    #Preferencja pracowników 16-32
+    nagroda_zleceniowcy = sum(
+        obciazenie_pracownikow[p]
+        for p in obciazenie_pracownikow
+        if 16 <= p <= 32
+    )
+    fitness += 3 * nagroda_zleceniowcy
+
+    return fitness
 
 
 
