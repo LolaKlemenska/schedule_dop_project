@@ -1,5 +1,6 @@
 import datetime
 import random
+from collections import defaultdict
 from random import choice
 import numpy as np
 import pandas as pd
@@ -70,25 +71,34 @@ def generuj_liste_kompetentnych_pracowników(pracownicy, nazwa_zajec, rola, umie
 
 def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list):
     osobnik = []
+    zajetosci = defaultdict(set) # (dzien, czas) -> {pracownicy}; zapamiętuje, którzy pracownicy w danym dniu o danej godzinie są zajęci
+
     for zajecia in rozklad_zajec_miesiac:
+        slot  = (zajecia['dzien_miesiaca'], zajecia['czas'])
         dostepni = generuj_liste_dostepnych_prac(zajecia['dzien_miesiaca'], zajecia['czas'], dyspozycyjnosc, id_pracownikow)
-        kompetetni_prow = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'prowadzenie', umiejetnosci)
-        kompetetni_asys = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'asysta', umiejetnosci)
-        if not dostepni:
-            osobnik.append(()) #nikt nie pracuje w danym dniu
-        if dostepni and not kompetetni_prow:
-            raise ValueError(
-                f'Bark kompetentnych prowadzących dla zajęć'
-                f'{zajecia["nazwa_zajec"]} dnia'
-                f'{zajecia["dzien_miesiaca"], zajecia["czas"]}.')
-        if dostepni and not kompetetni_asys:
-            raise ValueError(
-                f'Bark kompetentnych asystujących dla zajęć'
-                f'{zajecia["nazwa_zajec"]} dnia'
-                f'{zajecia["dzien_miesiaca"], zajecia["czas"]}.')
-        else:
-            prow = random.choice(kompetetni_prow)
-            asys = random.choice(kompetetni_asys)
-            osobnik.append((prow, asys))
+        dostepni = [p for p in dostepni if p not in zajetosci[slot]] #dostępni sa tylko ci, którzy nie prowadza żadnych innych zajęć w tym czasie
+        #print(f'Dostepni: {dostepni}')
+        prow, asys = -1, -1
+        if dostepni:
+            kompetetni_prow = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'prowadzenie',
+                                                                      umiejetnosci)
+            # print(f'Kompetetni prow: {kompetetni_prow}')
+
+            if kompetetni_prow:
+                prow = random.choice(kompetetni_prow)
+                zajetosci[slot].add(prow)
+
+            kompetetni_asys = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'asysta',
+                                                                      umiejetnosci)
+            # print(f'Kompetetni asys: {kompetetni_asys}')
+
+            if prow in kompetetni_asys:
+                kompetetni_asys.remove(prow)
+
+            if kompetetni_asys:
+                asys = random.choice(kompetetni_asys)
+                zajetosci[slot].add(asys)
+
+        osobnik.append((prow, asys))
     return osobnik
 
