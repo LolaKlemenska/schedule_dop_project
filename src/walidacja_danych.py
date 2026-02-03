@@ -2,6 +2,11 @@ import pandas as pd
 
 
 def sprawdz_kolumny(df: pd.DataFrame):
+    """
+    Sprawdza, czy kolumny DataFrame dokładnie odpowiadają jednemu
+    z predefiniowanych schematów i zwraca nazwę pasującego schematu.
+    Jeśli brak dopasowania, zwraca None.
+    """
     schematy = {
         "umiejetnosci": ['pracownik', 'specjalizacja', 'nazwa_zajec', 'rola', 'udział'],
         "rozklad": ['dzien', 'czas', 'sala', 'nazwa_zajec'],
@@ -17,7 +22,10 @@ def sprawdz_kolumny(df: pd.DataFrame):
     return None
 
 def sprawdz_NaN(df: pd.DataFrame, nazwa: str = "DataFrame") -> list[str]:
-    """Sprawdza występowanie wartości NaN."""
+    """
+    Sprawdza, które kolumny DataFrame zawierają wartości NaN
+    i zwraca listę komunikatów lub None, jeśli brak NaN.
+    """
     bledy = []
 
     nan_cols = df.columns[df.isna().any()]
@@ -36,6 +44,8 @@ def sprawdz_typy_danych(
     nazwa: str = "DataFrame"
 ) -> list[str]:
     """
+    Sprawdza zgodność typów danych w kolumnach DataFrame
+    z oczekiwanymi typami i zwraca listę komunikatów.
     oczekiwane_typy = {
         'kolumna': typ (np. int, float, str)
     }
@@ -55,6 +65,11 @@ def sprawdz_typy_danych(
     return bledy
 
 def sprawdz_kolumny_i_typy(df: pd.DataFrame) -> list[str]:
+    """
+    Rozpoznaje schemat kolumn DataFrame i sprawdza,
+    czy typy danych są zgodne z oczekiwanym schematem.
+    Zwraca listę komunikatów.
+    """
     bledy = []
 
     SCHEMAT_TYPY = {
