@@ -44,12 +44,14 @@ def wczytaj_rozklad_zajec(sciezka_pliku: str) -> pd.DataFrame:
 
 def wczytaj_dyspozycyjnosc(sciezka_pliku: str) -> pd.DataFrame:
     """Wczytuje informacje o dyspozycyjności pracowników z pliku Excel i zwraca w formacie długim."""
-    df = pd.read_excel(
-        sciezka_pliku,
-        skiprows=2,
-        header=[0, 1]
-    )
-
+    try:
+        df = pd.read_excel(
+            sciezka_pliku,
+            skiprows=2,
+            header=[0, 1]
+        )
+    except Exception as e:
+        raise IOError(f"Błąd przy wczytywaniu pliku dyspozcyjności: {e}")
     df = df.iloc[:, 1:-1]
     df = df.iloc[:-1, :]
     df = df.fillna(0)
@@ -85,12 +87,14 @@ def wczytaj_dyspozycyjnosc(sciezka_pliku: str) -> pd.DataFrame:
 
 def wczytaj_kalendarz(sciezka_pliku: str) -> pd.DataFrame:
     """Wczytuje kalendarz danego miesiąca z pliku Excel zawierającego dyspozycyjność pracowników"""
-    df = pd.read_excel(
-        sciezka_pliku,
-        skiprows=2,
-        header=None
-    )
-
+    try:
+        df = pd.read_excel(
+            sciezka_pliku,
+            skiprows=2,
+            header=None
+        )
+    except Exception as e:
+        raise IOError(f"Błąd przy wczytywaniu pliku kalendarza: {e}")
     df = df.iloc[0:2,2:-1].T
     df = df.reset_index(drop=True)
     df = df.rename(columns={0 : 'dzien_miesiaca', 1 : 'dzien_tygodnia'})
