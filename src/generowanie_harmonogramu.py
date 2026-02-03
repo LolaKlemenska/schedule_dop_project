@@ -16,8 +16,6 @@ def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.D
     zajecia: lista zawierająca słowniki z kluczami id, dzien_miesiaca, dzien_tygodnia, czas, sala, nazwa_zajec
     umiejetnosci: set((pracownik, nazwa_zajęć, rola))
     dyspozycyjnosc: set((pracownik, dzień_miesiąca, godziny))
-
-
     '''
 
     #zajecia = [{id, dzien_miesiaca, dzien_tygodnia, czas, sala, nazwa_zajęć}]
@@ -54,7 +52,7 @@ def generuj_liste_dostepnych_prac(dzien, godzina, dyspozycyjnosc, pracownicy):
     dostepni = []
     for id_prac in pracownicy:
         id_prac = int(id_prac)
-        if (id_prac, dzien, 10) in dyspozycyjnosc:
+        if (id_prac, dzien, '10') in dyspozycyjnosc:
             dostepni.append(id_prac)
         elif (id_prac, dzien, '5_1') in dyspozycyjnosc:
             if datetime.time(8,0) <= godzina <= datetime.time(11,0):
@@ -80,7 +78,6 @@ def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjno
         slot  = (zajecia['dzien_miesiaca'], zajecia['czas'])
         dostepni = generuj_liste_dostepnych_prac(zajecia['dzien_miesiaca'], zajecia['czas'], dyspozycyjnosc, id_pracownikow)
         dostepni = [p for p in dostepni if p not in zajetosci[slot]] #dostępni sa tylko ci, którzy nie prowadza żadnych innych zajęć w tym czasie
-        #print(f'Dostepni: {dostepni}')
         prow, asys = -1, -1
         if dostepni:
             kompetetni_prow = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'prowadzenie',
@@ -144,6 +141,12 @@ def fitness(osobnik: Osobnik, id_pracownikow: list):
 
     return fitness
 
+def selekcja_pary(populacja: Populacja):
+    return random.choices(
+        population=populacja,
+        weights=[fitness(osobnik) for osobnik in populacja],
+        k=2
+    )
 
 
 
