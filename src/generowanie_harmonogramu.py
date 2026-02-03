@@ -141,10 +141,10 @@ def fitness(osobnik: Osobnik, id_pracownikow: list):
 
     return fitness
 
-def selekcja_pary(populacja: Populacja):
+def selekcja_pary(populacja: Populacja, id_pracownikow: list) -> list[Osobnik]:
     return random.choices(
         population=populacja,
-        weights=[fitness(osobnik) for osobnik in populacja],
+        weights=[fitness(osobnik, id_pracownikow) for osobnik in populacja],
         k=2
     )
 
