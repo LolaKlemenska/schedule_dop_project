@@ -14,7 +14,6 @@ def wczytaj_umiejetnosci(sciezka_pliku: str) -> pd.DataFrame:
 
 
     df_tidy = df_tidy[['pracownik','specjalizacja','nazwa_zajec','rola','udział']]
-    #walidacja_wczytanych_danych(df, typ='umiejetnosci')
     df_tidy['pracownik'] = df_tidy['pracownik'].str.replace('pracownik ', '', regex=False).astype(int) #zamienia stringi w inty, będące id pracownika
     df_tidy['udział'] = df_tidy['udział'].astype(int)
     return df_tidy
@@ -34,11 +33,11 @@ def wczytaj_rozklad_zajec(sciezka_pliku: str) -> pd.DataFrame:
     raw = raw[~raw["czas"].isin(dni)]
     raw = raw.drop(index=0)
     df = raw.melt(
-    id_vars=["dzien", "czas"],  # kolumny, które zostają bez zmian
-    value_name="nazwa_zajec",  # jak ma się nazywać nowa kolumna z wartościami
-    var_name="sala"             # jak ma się nazywać nowa kolumna z nazwami kolumn
+    id_vars=["dzien", "czas"],
+    value_name="nazwa_zajec",
+    var_name="sala"
     )
-    #walidacja_wczytanych_danych(df, typ='rozklad')
+    df = df.dropna()
     return df
 
 
