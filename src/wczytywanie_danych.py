@@ -16,6 +16,7 @@ def wczytaj_umiejetnosci(sciezka_pliku: str) -> pd.DataFrame:
     df_tidy = df_tidy[['pracownik','specjalizacja','nazwa_zajec','rola','udział']]
     #walidacja_wczytanych_danych(df, typ='umiejetnosci')
     df_tidy['pracownik'] = df_tidy['pracownik'].str.replace('pracownik ', '', regex=False).astype(int) #zamienia stringi w inty, będące id pracownika
+    df_tidy['udział'] = df_tidy['udział'].astype(int)
     return df_tidy
 
 def wczytaj_rozklad_zajec(sciezka_pliku: str) -> pd.DataFrame:

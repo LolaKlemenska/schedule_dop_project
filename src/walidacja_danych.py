@@ -1,3 +1,4 @@
+from typing import Union
 import pandas as pd
 from datetime import time
 
@@ -114,6 +115,74 @@ def sprawdz_kolumny_i_typy(df: pd.DataFrame) -> list[str]:
     bledy += sprawdz_typy_danych(
         df,
         SCHEMAT_TYPY[schemat],
+        nazwa=schemat
+    )
+
+    return bledy
+
+def sprawdz_zakresy(
+    df: pd.DataFrame,
+    zakresy: dict[str, tuple[Union[float, int], Union[float, int]]],
+    nazwa: str = "DataFrame"
+) -> list[str]:
+    """
+    Sprawdza, czy wartości liczbowych kolumn w DataFrame mieszczą się w określonych zakresach.
+
+    zakresy = {
+        'kolumna': (min, max)
+    }
+    """
+    bledy = []
+
+    for kol, (min_val, max_val) in zakresy.items():
+        if kol not in df.columns:
+            continue
+
+        poza = df[(df[kol] < min_val) | (df[kol] > max_val)]
+        if not poza.empty:
+            bledy.append(
+                f"[{nazwa}] Kolumna '{kol}' zawiera wartości poza zakresem "
+                f"[{min_val}, {max_val}] (liczba: {len(poza)})."
+            )
+
+    return bledy
+
+def sprawdz_kolumny_i_zakresy(df: pd.DataFrame) -> list[str]:
+    """
+    Rozpoznaje schemat kolumn DataFrame i sprawdza,
+    czy wartości liczbowe mieszczą się w dozwolonych zakresach.
+    Zwraca listę komunikatów.
+    """
+    bledy = []
+    SCHEMAT_ZAKRESY = {
+        "umiejetnosci": {
+            "udział": (0, 1)
+        },
+        "dyspozycyjnosc": {
+            "dzień_miesiąca": (1, 31),
+            "godziny": (time(0, 0), time(23, 59, 59))
+        },
+        "rozklad_miesiac": {
+            "dzien_miesiaca": (1, 31)
+        },
+        "kalendarz": {
+            "dzien_miesiaca": (1, 31)
+        },
+        # rozklad tygodniowy nie ma sensownych zakresów liczbowych
+        "rozklad": {}
+    }
+
+    schemat = sprawdz_kolumny(df)
+    if schemat is None:
+        bledy.append("Nieznany schemat kolumn DataFrame.")
+        return bledy
+
+    if schemat not in SCHEMAT_ZAKRESY:
+        return bledy  # brak zakresów = brak błędów
+
+    bledy += sprawdz_zakresy(
+        df,
+        SCHEMAT_ZAKRESY[schemat],
         nazwa=schemat
     )
 
