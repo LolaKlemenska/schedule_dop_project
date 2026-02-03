@@ -23,10 +23,10 @@ def sprawdz_kolumny(df: pd.DataFrame):
 
     return None
 
-def sprawdz_NaN(df: pd.DataFrame, nazwa: str = "DataFrame") -> list[str]:
+def sprawdz_NaN(df: pd.DataFrame) -> list[str]:
     """
     Sprawdza, które kolumny DataFrame zawierają wartości NaN
-    i zwraca listę komunikatów lub None, jeśli brak NaN.
+    i zwraca listę komunikatów.
     """
     bledy = []
 
@@ -34,10 +34,8 @@ def sprawdz_NaN(df: pd.DataFrame, nazwa: str = "DataFrame") -> list[str]:
     for col in nan_cols:
         liczba = df[col].isna().sum()
         bledy.append(
-            f"[{nazwa}] Kolumna '{col}' zawiera {liczba} wartości NaN."
+            f" Kolumna '{col}' zawiera {liczba} wartości NaN."
         )
-    if bledy == []:
-        return None
     return bledy
 
 def sprawdz_typy_danych(
@@ -188,3 +186,19 @@ def sprawdz_kolumny_i_zakresy(df: pd.DataFrame) -> list[str]:
 
     return bledy
 
+
+def waliduj_df(df: pd.DataFrame) -> list[str]:
+    """
+    Uruchamia pełną walidację DataFrame:
+    1. Sprawdza kolumny i typy danych
+    2. Sprawdza wartości NaN
+    3. Sprawdza, czy wartości liczbowe mieszczą się w dozwolonych zakresach
+    Zwraca listę z komunikatami.
+    """
+    bledy = []
+
+    bledy += sprawdz_kolumny_i_typy(df)
+    bledy += sprawdz_NaN(df)
+    bledy += sprawdz_kolumny_i_zakresy(df)
+
+    return bledy
