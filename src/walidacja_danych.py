@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import time
 
 
 def sprawdz_kolumny(df: pd.DataFrame):
@@ -46,6 +47,7 @@ def sprawdz_typy_danych(
     """
     Sprawdza zgodność typów danych w kolumnach DataFrame
     z oczekiwanymi typami i zwraca listę komunikatów.
+
     oczekiwane_typy = {
         'kolumna': typ (np. int, float, str)
     }
@@ -78,11 +80,11 @@ def sprawdz_kolumny_i_typy(df: pd.DataFrame) -> list[str]:
         "specjalizacja": str,
         "nazwa_zajec": str,
         "rola": str,
-        "udział": (int, float)
+        "udział": int
     },
     "rozklad": {
         "dzien": str,
-        "czas": str,
+        "czas": time,
         "sala": str,
         "nazwa_zajec": str
     },
@@ -95,7 +97,7 @@ def sprawdz_kolumny_i_typy(df: pd.DataFrame) -> list[str]:
     "rozklad_miesiac": {
         "dzien_miesiaca": int,
         "dzien_tygodnia": str,
-        "czas": str,
+        "czas": time,
         "sala": str,
         "nazwa_zajec": str
     },

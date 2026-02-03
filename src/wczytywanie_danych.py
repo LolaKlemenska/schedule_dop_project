@@ -73,7 +73,7 @@ def wczytaj_dyspozycyjnosc(sciezka_pliku: str) -> pd.DataFrame:
                     pracownik_col.append(int(pracownik.split()[1]))
                     dzien_miesiaca.append(int(dzien))
                     dzien_tygodnia.append(tydz)
-                    godziny.append(godz)
+                    godziny.append(str(godz))
 
     return pd.DataFrame({
         "pracownik": pracownik_col,
