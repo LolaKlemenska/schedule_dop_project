@@ -102,3 +102,14 @@ def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjno
         osobnik.append((prow, asys))
     return osobnik
 
+def generuj_populacje(rozmiar: int, umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list):
+    populacja = []
+    for i in range(rozmiar):
+        osobnik = generuj_osobnika(umiejetnosci, rozklad_zajec_miesiac, dyspozycyjnosc, id_pracownikow)
+        populacja.append(osobnik)
+    return populacja
+
+
+
+
+
