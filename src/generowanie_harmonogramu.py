@@ -16,6 +16,7 @@ def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.D
     zajecia: lista zawierająca słowniki z kluczami id, dzien_miesiaca, dzien_tygodnia, czas, sala, nazwa_zajec
     umiejetnosci: set((pracownik, nazwa_zajęć, rola))
     dyspozycyjnosc: set((pracownik, dzień_miesiąca, godziny))
+    id_pracowników: lista z id_pracowników
     '''
 
     #zajecia = [{id, dzien_miesiaca, dzien_tygodnia, czas, sala, nazwa_zajęć}]
@@ -43,7 +44,7 @@ def przygotuj_dane(df_umiejetnosci: pd.DataFrame, df_rozklad_zajec_miesiac: pd.D
 
     id_pracownikow = df_dyspozycyjnosc['pracownik'].unique()
 
-    return umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow
+    return umiejetnosci, zajecia, dyspozycyjnosc, list(id_pracownikow)
 
 
 def generuj_liste_dostepnych_prac(dzien, godzina, dyspozycyjnosc, pracownicy):
@@ -147,6 +148,36 @@ def selekcja_pary(populacja: Populacja, id_pracownikow: list) -> list[Osobnik]:
         weights=[fitness(osobnik, id_pracownikow) for osobnik in populacja],
         k=2
     )
+
+def crossover(osobnik1: Osobnik, osobnik2: Osobnik) -> tuple[Osobnik, Osobnik]:
+    if len(osobnik1) != len(osobnik2):
+        raise ValueError('Osobniki, które podlegają crossoverowi muszą być tej samej długości')
+    length = len(osobnik1)
+    if length <= 2:
+        return osobnik1, osobnik2
+
+    p = random.randint(1, length - 1)
+    return osobnik1[0:p] + osobnik2[p:], osobnik2[0:p] + osobnik1[p:]
+
+
+def mutacja(osobnik: Osobnik, id_pracowników: list[int], liczba_mutacji: int = 1, prawdopodobienstwo: float = 0.5 ) -> Osobnik:
+    for _ in range(liczba_mutacji):
+        index = random.randrange(len(osobnik))
+
+        prow, asys = osobnik[index]
+        pracownicy = id_pracowników.copy()
+        pracownicy.remove(prow) #usuwamy prowadzącego, aby nie został ponownie wylosowany
+        pracownicy.remove(asys) #usuwamy asystującego, aby nie został ponownie wylosowany
+
+        prow = random.choice(pracownicy) # losujemy nowego prowadzacego
+        pracownicy.remove(prow) #usuwamy go z listy pracowników, aby nie był wylosowany jako asystujący
+
+        asys = random.choice(pracownicy)  #losujemy nowego asystującego
+
+        if random.random() < prawdopodobienstwo:
+            osobnik[index] = prow, asys # ustawiamy nowo wylosowanych pracowników
+
+    return osobnik
 
 
 
