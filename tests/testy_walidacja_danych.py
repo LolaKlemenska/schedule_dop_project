@@ -1,259 +1,117 @@
-import pandas as pd
+import unittest
 from src.walidacja_danych import *
 
-class TestWalidacjaDanych:
-    def test_sprawdz_kolumny(self):
+class TestSprawdzKolumny(unittest.TestCase):
+
+    def test_umiejetnosci(self):
         df = pd.DataFrame(columns=['pracownik', 'specjalizacja', 'nazwa_zajec', 'rola', 'udział'])
-        assert sprawdz_kolumny(df)
+        self.assertEqual(sprawdz_kolumny(df), 'umiejetnosci')
 
-    def test_sprawdz_kolumny2(self):
+    def test_rozklad(self):
         df = pd.DataFrame(columns=['dzien', 'czas', 'sala', 'nazwa_zajec'])
-        assert sprawdz_kolumny(df)
+        self.assertEqual(sprawdz_kolumny(df), 'rozklad')
 
-    def test_sprawdz_kolumny3(self):
-        # sprawdza czy sprawdz_kolumny zwraca True, gdy wartości kolumn są poprawne
-        columns = [('dzień miesiąca', 'dzień tygodnia'),
-                   (1, 'cz'),
-                    (2, 'pt'),
-                     (3, 'sb'),
-                     (4, 'nd'),
-                     (5, 'pn'),
-                     (6, 'wt'),
-                     (7, 'śr'),
-                     (8, 'cz'),
-                     (9, 'pt'),
-                     (10, 'sb'),
-                     (11, 'nd'),
-                     (12, 'pn'),
-                     (13, 'wt'),
-                     (14, 'śr'),
-                     (15, 'cz'),
-                     (16, 'pt'),
-                     (17, 'sb'),
-                     (18, 'nd'),
-                     (19, 'pn'),
-                     (20, 'wt'),
-                     (21, 'śr'),
-                     (22, 'cz'),
-                     (23, 'pt'),
-                     (24, 'sb'),
-                     (25, 'nd'),
-                     (26, 'pn'),
-                     (27, 'wt'),
-                     (28, 'śr'),
-                     (29, 'cz'),
-                     (30, 'pt'),
-                     (31, 'sb')]
-        df = pd.DataFrame(columns=columns)
+    def test_dyspozycyjnosc(self):
+        df = pd.DataFrame(columns=["pracownik", "dzień_miesiąca", "dzień_tygodnia", "godziny"])
+        self.assertEqual(sprawdz_kolumny(df), 'dyspozycyjnosc')
 
-        assert sprawdz_kolumny(df)
+    def test_rozklad_miesiac(self):
+        df = pd.DataFrame(columns=["dzien_miesiaca", "dzien_tygodnia", "czas", "sala", "nazwa_zajec"])
+        self.assertEqual(sprawdz_kolumny(df), 'rozklad_miesiac')
 
-    def test_sprawdz_kolumny4(self):
-        # Sprawdza czy sprawdz_kolumny zwraca False, gdy jest za mało dni miesiąca
-        columns = [('dzień miesiąca', 'dzień tygodnia'),
-                   (1, 'cz'),
-                   (2, 'pt'),
-                   (3, 'sb'),
-                   (4, 'nd'),
-                   (5, 'pn'),
-                   (6, 'wt'),
-                   (7, 'śr'),
-                   (8, 'cz'),
-                   (9, 'pt'),
-                   (10, 'sb'),
-                   (11, 'nd'),
-                   (12, 'pn'),
-                   (13, 'wt'),
-                   (14, 'śr'),
-                   (15, 'cz'),
-                   (16, 'pt'),
-                   (17, 'sb'),
-                   (18, 'nd'),
-                   (19, 'pn')]
-        df = pd.DataFrame(columns=columns)
-        assert not sprawdz_kolumny(df)
+    def test_kalendarz(self):
+        df = pd.DataFrame(columns=["dzien_miesiaca", "dzien_tygodnia"])
+        self.assertEqual(sprawdz_kolumny(df), 'kalendarz')
 
-    def test_sprawdz_kolumny5(self):
-        #sprawdza czy sprawdz_kolumny zawraca False, gdy jedna z wartości dni miesiąca jest większa niż 31
-        columns = [('dzień miesiąca', 'dzień tygodnia'),
-                   (1, 'cz'),
-                   (2, 'pt'),
-                   (3, 'sb'),
-                   (4, 'nd'),
-                   (5, 'pn'),
-                   (6, 'wt'),
-                   (7, 'śr'),
-                   (8, 'cz'),
-                   (9, 'pt'),
-                   (10, 'sb'),
-                   (11, 'nd'),
-                   (12, 'pn'),
-                   (13, 'wt'),
-                   (14, 'śr'),
-                   (15, 'cz'),
-                   (16, 'pt'),
-                   (17, 'sb'),
-                   (18, 'nd'),
-                   (19, 'pn'),
-                   (2000, 'wt'),
-                   (21, 'śr'),
-                   (22, 'cz'),
-                   (23, 'pt'),
-                   (24, 'sb'),
-                   (25, 'nd'),
-                   (26, 'pn'),
-                   (27, 'wt'),
-                   (28, 'śr'),
-                   (29, 'cz'),
-                   (30, 'pt'),
-                   (31, 'sb')]
+    def test_brak_dopasowania(self):
+        df = pd.DataFrame(columns=['a','b','c'])
+        self.assertIsNone(sprawdz_kolumny(df))
 
-        df = pd.DataFrame(columns=columns)
-        assert not sprawdz_kolumny(df)
-
-    def test_sprawdz_kolumny6(self):
-        # sprawdza czy sprawdz_kolumny zawraca True, gdy miesiąc jest najkrótszy w roku
-        columns = [('dzień miesiąca', 'dzień tygodnia'),
-                   (1, 'cz'),
-                   (2, 'pt'),
-                   (3, 'sb'),
-                   (4, 'nd'),
-                   (5, 'pn'),
-                   (6, 'wt'),
-                   (7, 'śr'),
-                   (8, 'cz'),
-                   (9, 'pt'),
-                   (10, 'sb'),
-                   (11, 'nd'),
-                   (12, 'pn'),
-                   (13, 'wt'),
-                   (14, 'śr'),
-                   (15, 'cz'),
-                   (16, 'pt'),
-                   (17, 'sb'),
-                   (18, 'nd'),
-                   (19, 'pn'),
-                   (20, 'wt'),
-                   (21, 'śr'),
-                   (22, 'cz'),
-                   (23, 'pt'),
-                   (24, 'sb'),
-                   (25, 'nd'),
-                   (26, 'pn'),
-                   (27, 'wt'),
-                   (28, 'śr')]
-
-        df = pd.DataFrame(columns=columns)
-        assert sprawdz_kolumny(df)
-
-    def test_sprawdz_kolumny7(self):
-        # sprawdza czy sprawdz_kolumny zawraca False, gdy dni tygodnia nie są w dobrej kolejności
-        columns = [('dzień miesiąca', 'dzień tygodnia'),
-                   (1, 'cz'),
-                   (2, 'pt'),
-                   (3, 'pn'),
-                   (4, 'nd'),
-                   (5, 'pn'),
-                   (6, 'wt'),
-                   (7, 'wt'),
-                   (8, 'cz'),
-                   (9, 'pt'),
-                   (10, 'sb'),
-                   (11, 'nd'),
-                   (12, 'pn'),
-                   (13, 'wt'),
-                   (14, 'śr'),
-                   (15, 'cz'),
-                   (16, 'pt'),
-                   (17, 'wt'),
-                   (18, 'nd'),
-                   (19, 'pn'),
-                   (20, 'wt'),
-                   (21, 'śr'),
-                   (22, 'nd'),
-                   (23, 'pt'),
-                   (24, 'sb'),
-                   (25, 'nd'),
-                   (26, 'pn'),
-                   (27, 'wt'),
-                   (28, 'śr'),
-                   (29, 'czw')]
-
-        df = pd.DataFrame(columns=columns)
-        assert not sprawdz_kolumny(df)
-
-    def test_sprawdz_kolumny8(self):
-        # sprawdza czy sprawdz_kolumny zawraca False, gdy dni miesiąca nie sa w dobrej kolejności
-        columns = [('dzień miesiąca', 'dzień tygodnia'),
-                   (1, 'cz'),
-                   (2, 'pt'),
-                   (3, 'sb'),
-                   (4, 'nd'),
-                   (5, 'pn'),
-                   (6, 'wt'),
-                   (8, 'śr'),
-                   (7, 'cz'),
-                   (9, 'pt'),
-                   (10, 'sb'),
-                   (11, 'nd'),
-                   (12, 'pn'),
-                   (13, 'wt'),
-                   (15, 'śr'),
-                   (14, 'cz'),
-                   (16, 'pt'),
-                   (17, 'sb'),
-                   (18, 'nd'),
-                   (20, 'pn'),
-                   (19, 'wt'),
-                   (21, 'śr'),
-                   (22, 'cz'),
-                   (23, 'pt'),
-                   (24, 'sb'),
-                   (25, 'nd'),
-                   (26, 'pn'),
-                   (27, 'wt'),
-                   (28, 'śr'),
-                   (29, 'cz'),
-                   (30, 'pt')]
-
-        df = pd.DataFrame(columns=columns)
-        assert not sprawdz_kolumny(df)
+    def test_kolejnosc_ma_znaczenie(self):
+        df = pd.DataFrame(columns=['nazwa_zajec','czas','dzien','sala'])
+        self.assertIsNone(sprawdz_kolumny(df))
 
 
-    def test_sprawdz_kolumny9(self):
-        # sprawdza czy sprawdz_kolumny zawraca False, gdy na zerowym miejscu w liście z nazwami kolumn niepoprawnie wpisane są nazwy wierszy
-        columns = [('dzień mieiąca', 'dzień tygodnia'),
-                   (1, 'cz'),
-                   (2, 'pt'),
-                   (3, 'sb'),
-                   (4, 'nd'),
-                   (5, 'pn'),
-                   (6, 'wt'),
-                   (8, 'śr'),
-                   (7, 'cz'),
-                   (9, 'pt'),
-                   (10, 'sb'),
-                   (11, 'nd'),
-                   (12, 'pn'),
-                   (13, 'wt'),
-                   (15, 'śr'),
-                   (14, 'cz'),
-                   (16, 'pt'),
-                   (17, 'sb'),
-                   (18, 'nd'),
-                   (20, 'pn'),
-                   (19, 'wt'),
-                   (21, 'śr'),
-                   (22, 'cz'),
-                   (23, 'pt'),
-                   (24, 'sb'),
-                   (25, 'nd'),
-                   (26, 'pn'),
-                   (27, 'wt'),
-                   (28, 'śr'),
-                   (29, 'cz'),
-                   (30, 'pt')]
+class TestSprawdzNaN(unittest.TestCase):
 
-        df = pd.DataFrame(columns=columns)
-        assert not sprawdz_kolumny(df)
+    def test_brak_nan(self):
+        df = pd.DataFrame({'a':[1,2], 'b':[3,4]})
+        self.assertEqual(sprawdz_NaN(df), [])
 
+    def test_istnieja_nan(self):
+        df = pd.DataFrame({'a':[1, None], 'b':[None, 4]})
+        wynik = sprawdz_NaN(df)
+        self.assertIn(" Kolumna 'a' zawiera 1 wartości NaN.", wynik)
+        self.assertIn(" Kolumna 'b' zawiera 1 wartości NaN.", wynik)
+
+    def test_pusta_tabela(self):
+        df = pd.DataFrame(columns=['a', 'b'])
+        self.assertEqual(sprawdz_NaN(df), [])
+
+
+class TestSprawdzTypyDanych(unittest.TestCase):
+
+    def test_poprawne_typy(self):
+        df = pd.DataFrame({'a':[1,2,3], 'b':['x','y','z'], 'c':[1,2,3]})
+        oczekiwane = {'a': int, 'b': str, 'c': int}
+        self.assertEqual(sprawdz_typy_danych(df, oczekiwane, nazwa="test"), [])
+
+    def test_bledne_typy(self):
+        df = pd.DataFrame({'a':[1,2,3], 'b':['x','y','z'], 'c':[None, 4, 5]})
+        oczekiwane = {'a': int, 'b': str, 'c': int}
+        wynik = sprawdz_typy_danych(df, oczekiwane, nazwa="test")
+        self.assertEqual(wynik, ["[test] Kolumna 'c' nie ma typu int."])
+
+
+class TestSprawdzZakresy(unittest.TestCase):
+
+    def test_poprawny_zakres_liczbowy(self):
+        df = pd.DataFrame({'udział':[0,1,1,0]})
+        zakresy = {'udział': (0,1)}
+        self.assertEqual(sprawdz_zakresy(df, zakresy), [])
+
+    def test_bledny_zakres_liczbowy(self):
+        df = pd.DataFrame({'udział':[0,2,1]})
+        zakresy = {'udział': (0,1)}
+        wynik = sprawdz_zakresy(df, zakresy)
+        self.assertIn("[DataFrame] Kolumna 'udział' zawiera wartości poza zakresem [0, 1] (liczba: 1).", wynik)
+
+    def test_poprawny_zakres_czasowy(self):
+        df = pd.DataFrame({'czas':[time(8,0), time(12,0)]})
+        zakresy = {'czas': (time(0,0), time(23,59))}
+        self.assertEqual(sprawdz_zakresy(df, zakresy), [])
+
+    def test_bledny_zakres_czasowy(self):
+        df = pd.DataFrame({'czas':[time(8,0), time(23,59,59)]})
+        zakresy = {'czas': (time(0,0), time(23,0))}
+        wynik = sprawdz_zakresy(df, zakresy)
+        self.assertIn("[DataFrame] Kolumna 'czas' zawiera wartości poza zakresem [00:00:00, 23:00:00] (liczba: 1).", wynik)
+
+
+class TestWalidujDF(unittest.TestCase):
+
+    def test_walidacja_poprawna(self):
+        df = pd.DataFrame({
+            'pracownik':[1],
+            'specjalizacja':['matematyka'],
+            'nazwa_zajec':['algebra'],
+            'rola':['prowadzenie'],
+            'udział':[1]
+        })
+        self.assertEqual(waliduj_df(df), [])
+
+    def test_walidacja_z_bledami(self):
+        df = pd.DataFrame({
+            'pracownik':[1, None],
+            'specjalizacja':['matematyka', 'fizyka'],
+            'nazwa_zajec':['algebra', 'mechanika'],
+            'rola':['prowadzenie', 'asysta'],
+            'udział':[1, 2]
+        })
+        wynik = waliduj_df(df)
+        self.assertIn(" Kolumna 'pracownik' zawiera 1 wartości NaN.", wynik)
+        self.assertIn("[umiejetnosci] Kolumna 'udział' zawiera wartości poza zakresem [0, 1] (liczba: 1).", wynik)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

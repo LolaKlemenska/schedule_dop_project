@@ -58,10 +58,8 @@ def sprawdz_typy_danych(
             bledy.append(f"[{nazwa}] Brak kolumny '{kol}'.")
             continue
 
-        if not df[kol].map(lambda x: isinstance(x, typ) or pd.isna(x)).all():
-            bledy.append(
-                f"[{nazwa}] Kolumna '{kol}' nie ma typu {typ.__name__}."
-            )
+        if not df[kol].map(lambda x: isinstance(x, typ)).all():
+            bledy.append(f"[{nazwa}] Kolumna '{kol}' nie ma typu {typ.__name__}.")
 
     return bledy
 
