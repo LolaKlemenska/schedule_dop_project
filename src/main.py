@@ -1,7 +1,8 @@
 from wczytywanie_danych import wczytaj_umiejetnosci, wczytaj_rozklad_zajec, wczytaj_dyspozycyjnosc, wczytaj_kalendarz, wczytaj_rozklad_zajec_miesiac
 from walidacja_danych import waliduj_df
-from generowanie_harmonogramu import przygotuj_dane, generuj_liste_dostepnych_prac, generuj_liste_kompetentnych_pracowników, generuj_osobnika
+from generowanie_harmonogramu import przeprowadz_ewolucje, harmonogram_do_dataframe, fitness
 import os
+import pandas as pd
 
 def pipeline():
     '''Wczytywanie danych wejściowych'''
@@ -37,7 +38,26 @@ def pipeline():
         print("Wszystkie wgrane pliki są poprawne")
     else:
         print("Wgrane pliki zawierają błędy")
-    print("Hello from zaliczenie-projekt!")
 
+
+    # Po wywołaniu algorytmu genetycznego
+    populacja, pokolenie, historia_fitness = przeprowadz_ewolucje(umiejetnosci, rozklad_miesiac, dyspozycyjnosc)
+
+
+    # Pobierz najlepszy harmonogram (pierwszy w posortowanej populacji)
+    najlepszy_harmonogram = populacja[0]
+
+    # Konwertuj do DataFrame
+    df_wynik = harmonogram_do_dataframe(najlepszy_harmonogram, rozklad_miesiac, dyspozycyjnosc)
+    id_pracownikow = dyspozycyjnosc['pracownik'].unique()
+    # Wyświetl
+    print(df_wynik)
+
+    # Opcjonalnie zapisz do CSV
+    df_wynik.to_csv('harmonogram.csv', index=False)
+
+    # Wyświetl statystyki
+    print(f"\nOsiągnięte fitness: {fitness(najlepszy_harmonogram, id_pracownikow)}")
+    print(f"Liczba pokoleń: {pokolenie}")
 if __name__ == "__main__":
     pipeline()
