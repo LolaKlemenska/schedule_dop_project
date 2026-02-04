@@ -104,7 +104,7 @@ def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:list, dyspozycyjno
         osobnik.append((prow, asys))
     return osobnik
 
-def generuj_populacje(rozmiar: int, umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list) -> Populacja:
+def generuj_populacje(rozmiar: int, umiejetnosci: set, rozklad_zajec_miesiac:list, dyspozycyjnosc: set, id_pracownikow: list) -> Populacja:
     populacja = []
     for i in range(rozmiar):
         osobnik = generuj_osobnika(umiejetnosci, rozklad_zajec_miesiac, dyspozycyjnosc, id_pracownikow)
@@ -191,9 +191,7 @@ def mutacja(osobnik: Osobnik,
         dostepni = [p for p in dostepni if p not in zajetosci[slot]]  # dostępni sa tylko ci, którzy nie prowadza żadnych innych zajęć w tym czasie
 
         kompetetni_prow = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'prowadzenie', umiejetnosci)
-        print(kompetetni_prow)
         kompetetni_asys = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'asysta', umiejetnosci)
-        print(kompetetni_asys)
         stary_prow, stary_asys = osobnik[idx]
 
         #wylosowanie prowadzącego
@@ -222,5 +220,47 @@ def mutacja(osobnik: Osobnik,
 
     return osobnik
 
+def przeprowadz_ewolucje(
+        df_umiejetnosci: pd.DataFrame,
+        df_rozklad_zajec_miesiac: pd.DataFrame,
+        df_dyspozycyjnosc: pd.DataFrame,
+        fitness_limit: int = 100,
+        limit_generacji: int = 50,
+        rozmiar_populacji = 100
+) -> tuple[Populacja, int, list]:
+    umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow = przygotuj_dane(df_umiejetnosci, df_rozklad_zajec_miesiac, df_dyspozycyjnosc)
+    populacja = generuj_populacje(rozmiar_populacji, umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow)
+    fitness_historia = []
+    for i in range(limit_generacji):
+        populacja = sorted(
+            populacja,
+            key=lambda osobnik: fitness(osobnik, id_pracownikow),
+            reverse=True
+                )
+        wartosc_fitness = fitness(populacja[0], id_pracownikow)
+        fitness_historia.append(wartosc_fitness)
 
+        if wartosc_fitness < fitness_limit:
+            break
 
+        nowa_generacja = populacja[0:2]
+
+        for j in range(int(len(populacja) / 2) - 1):
+            rodzice = selekcja_pary(populacja, id_pracownikow)
+            potomek_a, potomek_b = crossover(rodzice[0], rodzice[1])
+            potomek_a = mutacja(potomek_a,umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow)
+            potomek_b = mutacja(potomek_b, umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow)
+            nowa_generacja += [potomek_a, potomek_b]
+
+        populacja = nowa_generacja
+
+    wartosc_fitness = fitness(populacja[0], id_pracownikow)
+    fitness_historia.append(wartosc_fitness)
+
+    populacja = sorted(
+        populacja,
+        key=lambda osobnik: fitness(osobnik, id_pracownikow),
+        reverse=True
+    )
+
+    return populacja, i, fitness_historia
