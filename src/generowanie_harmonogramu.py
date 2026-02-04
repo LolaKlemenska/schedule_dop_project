@@ -129,7 +129,7 @@ def fitness(osobnik: Osobnik, id_pracownikow: list):
     #Równomierne obciążenie pracowników
     obciazenie_pracownikow = policz_obciazenie_pracownikow(id_pracownikow, osobnik)
     sred_obciazenie = (sum(obciazenie_pracownikow.values()) / len(id_pracownikow))
-    kara_rownomierne_obciazenie = sum(abs(p - sred_obciazenie) for p in obciazenie_pracownikow)
+    kara_rownomierne_obciazenie = sum(abs(obciazenie_pracownikow[p] - sred_obciazenie) for p in obciazenie_pracownikow)
     fitness -= 1 * kara_rownomierne_obciazenie
 
 
