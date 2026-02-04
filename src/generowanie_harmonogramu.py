@@ -224,9 +224,9 @@ def przeprowadz_ewolucje(
         df_umiejetnosci: pd.DataFrame,
         df_rozklad_zajec_miesiac: pd.DataFrame,
         df_dyspozycyjnosc: pd.DataFrame,
-        fitness_limit: int = 100,
-        limit_generacji: int = 50,
-        rozmiar_populacji = 100
+        fitness_limit= 350,
+        limit_generacji= 500,
+        rozmiar_populacji= 25
 ) -> tuple[Populacja, int, list]:
     umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow = przygotuj_dane(df_umiejetnosci, df_rozklad_zajec_miesiac, df_dyspozycyjnosc)
     populacja = generuj_populacje(rozmiar_populacji, umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow)
@@ -240,7 +240,7 @@ def przeprowadz_ewolucje(
         wartosc_fitness = fitness(populacja[0], id_pracownikow)
         fitness_historia.append(wartosc_fitness)
 
-        if wartosc_fitness < fitness_limit:
+        if wartosc_fitness > fitness_limit:
             break
 
         nowa_generacja = populacja[0:2]
