@@ -264,3 +264,39 @@ def przeprowadz_ewolucje(
     )
 
     return populacja, i, fitness_historia
+
+
+def harmonogram_do_dataframe(
+    najlepszy_osobnik: Osobnik,
+    df_rozklad_zajec_miesiac: pd.DataFrame,
+    df_umiejetnosci: pd.DataFrame
+) -> pd.DataFrame:
+    '''
+    Konwertuje najlepszy harmonogram (osobnik) do czytelnego DataFrame.
+
+    Args:
+        najlepszy_osobnik: lista par (prowadzący_id, asystent_id)
+        df_rozklad_zajec_miesiac: DataFrame z rozkładem zajęć
+
+    Returns:
+        DataFrame z kolumnami: dzień, dzień_tygodnia, godzina, sala, nazwa_zajęć, prowadzący, asystent
+    '''
+    dane = []
+    id_pracownikow = df_umiejetnosci['pracownik'].unique()
+    for idx, (prow_id, asys_id) in enumerate(najlepszy_osobnik):
+        zajecia = df_rozklad_zajec_miesiac.iloc[idx]
+
+        dane.append({
+            'dzień_miesiąca': zajecia['dzien_miesiaca'],
+            'dzień_tygodnia': zajecia['dzien_tygodnia'],
+            'godzina': zajecia['czas'],
+            'sala': zajecia['sala'],
+            'nazwa_zajęć': zajecia['nazwa_zajec'],
+            'prowadzący_ID': f'pracownik {prow_id}' if prow_id != -1 else 'BRAK',
+            'asystent_ID': f'pracownik {asys_id}' if asys_id != -1 else 'BRAK'
+        })
+
+    df_harmonogram = pd.DataFrame(dane)
+    df_harmonogram = df_harmonogram.sort_values(['dzień_miesiąca', 'godzina'])
+
+    return df_harmonogram
