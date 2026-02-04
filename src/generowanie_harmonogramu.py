@@ -224,9 +224,9 @@ def przeprowadz_ewolucje(
         df_umiejetnosci: pd.DataFrame,
         df_rozklad_zajec_miesiac: pd.DataFrame,
         df_dyspozycyjnosc: pd.DataFrame,
-        fitness_limit= 350,
-        limit_generacji= 500,
-        rozmiar_populacji= 25
+        fitness_limit=400,
+        limit_generacji=500,
+        rozmiar_populacji=30
 ) -> tuple[Populacja, int, list]:
     umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow = przygotuj_dane(df_umiejetnosci, df_rozklad_zajec_miesiac, df_dyspozycyjnosc)
     populacja = generuj_populacje(rozmiar_populacji, umiejetnosci, zajecia, dyspozycyjnosc, id_pracownikow)
