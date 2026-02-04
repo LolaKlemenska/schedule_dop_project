@@ -1,3 +1,4 @@
+import copy
 import datetime
 import random
 from collections import defaultdict
@@ -71,7 +72,7 @@ def generuj_liste_kompetentnych_pracowników(pracownicy, nazwa_zajec, rola, umie
     return kompetentni
 
 
-def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:dict, dyspozycyjnosc: set, id_pracownikow: list) -> Osobnik:
+def generuj_osobnika(umiejetnosci: set, rozklad_zajec_miesiac:list, dyspozycyjnosc: set, id_pracownikow: list) -> Osobnik:
     osobnik = []
     zajetosci = defaultdict(set) # (dzien, czas) -> {pracownicy}; zapamiętuje, którzy pracownicy w danym dniu o danej godzinie są zajęci
 
@@ -159,23 +160,65 @@ def crossover(osobnik1: Osobnik, osobnik2: Osobnik) -> tuple[Osobnik, Osobnik]:
     p = random.randint(1, length - 1)
     return osobnik1[0:p] + osobnik2[p:], osobnik2[0:p] + osobnik1[p:]
 
+def sprawdz_zajetosci(osobnik: Osobnik, rozklad: list[dict]) -> dict:
+    zajetosci = defaultdict(set)
+    for (prow, asys), zajecia in zip(osobnik, rozklad):
+        slot = (zajecia['dzien_miesiaca'], zajecia['czas'])
+        if prow != -1:
+            zajetosci[slot].add(prow)
+        if asys != -1:
+            zajetosci[slot].add(asys)
+    return zajetosci
 
-def mutacja(osobnik: Osobnik, id_pracowników: list[int], liczba_mutacji: int = 1, prawdopodobienstwo: float = 0.5 ) -> Osobnik:
+
+def mutacja(osobnik: Osobnik,
+            umiejetnosci: set,
+            rozklad_zajec_miesiac:list,
+            dyspozycyjnosc: set,
+            id_pracownikow: list[int],
+            liczba_mutacji: int = 1,
+            prawdopodobienstwo: float = 0.8) -> Osobnik:
+
+    osobnik = copy.deepcopy(osobnik)
+    zajetosci = sprawdz_zajetosci(osobnik, rozklad_zajec_miesiac)
+
     for _ in range(liczba_mutacji):
-        index = random.randrange(len(osobnik))
+        idx = random.randrange(len(osobnik))
+        zajecia = rozklad_zajec_miesiac[idx]
+        slot = (zajecia["dzien_miesiaca"], zajecia['czas'])
 
-        prow, asys = osobnik[index]
-        pracownicy = id_pracowników.copy()
-        pracownicy.remove(prow) #usuwamy prowadzącego, aby nie został ponownie wylosowany
-        pracownicy.remove(asys) #usuwamy asystującego, aby nie został ponownie wylosowany
+        dostepni = generuj_liste_dostepnych_prac(zajecia['dzien_miesiaca'], zajecia['czas'], dyspozycyjnosc, id_pracownikow)
+        dostepni = [p for p in dostepni if p not in zajetosci[slot]]  # dostępni sa tylko ci, którzy nie prowadza żadnych innych zajęć w tym czasie
 
-        prow = random.choice(pracownicy) # losujemy nowego prowadzacego
-        pracownicy.remove(prow) #usuwamy go z listy pracowników, aby nie był wylosowany jako asystujący
+        kompetetni_prow = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'prowadzenie', umiejetnosci)
+        print(kompetetni_prow)
+        kompetetni_asys = generuj_liste_kompetentnych_pracowników(dostepni, zajecia['nazwa_zajec'], 'asysta', umiejetnosci)
+        print(kompetetni_asys)
+        stary_prow, stary_asys = osobnik[idx]
 
-        asys = random.choice(pracownicy)  #losujemy nowego asystującego
+        #wylosowanie prowadzącego
+        if kompetetni_prow:
+            prow = random.choice(kompetetni_prow)
+            kompetetni_asys = [p for p in kompetetni_asys if p != prow]
+        else:
+            prow = stary_prow
+
+        #wylosowanie asystującego
+        if kompetetni_asys:
+            asys = random.choice(kompetetni_asys)
+        else:
+            asys = stary_asys
 
         if random.random() < prawdopodobienstwo:
-            osobnik[index] = prow, asys # ustawiamy nowo wylosowanych pracowników
+            if stary_prow != -1:
+                zajetosci[slot].remove(stary_prow)  # stary prowadzący jest zwalniany z danego terminu
+            zajetosci[slot].add(prow) #nowy prowadzący jest zajmowany na dany termin
+
+            if stary_asys != -1:
+                zajetosci[slot].remove(stary_asys)# stary asystujący jest zwalniany z danego terminu
+            zajetosci[slot].add(asys) #nowy asystujący jest zajmowany na dany termin
+
+            osobnik[idx] = (prow, asys) # ustawiamy nowo wylosowanych pracowników
 
     return osobnik
 
