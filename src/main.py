@@ -9,14 +9,19 @@ from generowanie_harmonogramu import przeprowadz_ewolucje, harmonogram_do_datafr
 import os
 import pandas as pd
 
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
 def pipeline():
     '''Wczytywanie danych wejściowych'''
+    data_path = ROOT / "data" / "input"
     data_folder = 'data/input'
-    umiejetnosci = wczytaj_umiejetnosci(os.path.join("..", data_folder, "znajomosc_zajec.xlsx"))
-    rozklad_zajec_miesiac = wczytaj_rozklad_zajec(os.path.join("..", data_folder, "zajęcia.xlsx"))
-    dyspozycyjnosc = wczytaj_dyspozycyjnosc(os.path.join("..", data_folder, "grafik.xlsx"))
-    kalendarz = wczytaj_kalendarz(os.path.join("..", data_folder, "grafik.xlsx"))
-    rozklad_miesiac = wczytaj_rozklad_zajec_miesiac(os.path.join("..", data_folder, "zajęcia.xlsx"), os.path.join("..", data_folder, "grafik.xlsx"))
+    umiejetnosci = wczytaj_umiejetnosci(os.path.join( data_path, "znajomosc_zajec.xlsx"))
+    rozklad_zajec_miesiac = wczytaj_rozklad_zajec(os.path.join( data_path, "zajęcia.xlsx"))
+    dyspozycyjnosc = wczytaj_dyspozycyjnosc(os.path.join( data_path, "grafik.xlsx"))
+    kalendarz = wczytaj_kalendarz(os.path.join( data_path, "grafik.xlsx"))
+    rozklad_miesiac = wczytaj_rozklad_zajec_miesiac(os.path.join( data_path, "zajęcia.xlsx"), os.path.join( data_path, "grafik.xlsx"))
     print("Wgrano pliki wejsciowe")
     '''Walidacja poprawności wgranych plików'''
     print('Waliduję przesłane pliki...')
@@ -60,7 +65,10 @@ def pipeline():
     print(df_wynik)
 
     # Opcjonalnie zapisz do CSV
-    df_wynik.to_csv('harmonogram.csv', index=False)
+    results_dir = ROOT / "data" / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    df_wynik.to_csv(results_dir / "harmonogram.csv", index=False)
 
     # Wyświetl statystyki
     print(f"\nOsiągnięte fitness: {fitness(najlepszy_harmonogram, id_pracownikow)}")

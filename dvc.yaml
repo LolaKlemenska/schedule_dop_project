@@ -1,0 +1,10 @@
+stages:
+  run_ga:
+    cmd: python src/main.py
+    deps:
+      - src/
+      - data/input/grafik.xlsx
+      - data/input/zajęcia.xlsx
+      - data/input/znajomosc_zajec.xlsx
+    outs:
+      - data/results
