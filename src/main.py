@@ -1,3 +1,8 @@
+import random
+
+SEED = 1234
+random.seed(SEED)
+
 from wczytywanie_danych import wczytaj_umiejetnosci, wczytaj_rozklad_zajec, wczytaj_dyspozycyjnosc, wczytaj_kalendarz, wczytaj_rozklad_zajec_miesiac
 from walidacja_danych import waliduj_df
 from generowanie_harmonogramu import przeprowadz_ewolucje, harmonogram_do_dataframe, fitness
@@ -6,11 +11,11 @@ import pandas as pd
 
 def pipeline():
     '''Wczytywanie danych wejściowych'''
-    umiejetnosci = wczytaj_umiejetnosci(os.path.join("..", "data", "znajomosc_zajec.xlsx"))
-    rozklad_zajec_miesiac = wczytaj_rozklad_zajec(os.path.join("..", "data", "zajęcia.xlsx"))
-    dyspozycyjnosc = wczytaj_dyspozycyjnosc(os.path.join("..", "data", "grafik.xlsx"))
-    kalendarz = wczytaj_kalendarz(os.path.join("..", "data", "grafik.xlsx"))
-    rozklad_miesiac = wczytaj_rozklad_zajec_miesiac(os.path.join("..", "data", "zajęcia.xlsx"), os.path.join("..", "data", "grafik.xlsx"))
+    data_folder = 'data/input'
+    umiejetnosci = wczytaj_umiejetnosci(os.path.join("..", data_folder, "znajomosc_zajec.xlsx"))
+    rozklad_zajec_miesiac = wczytaj_rozklad_zajec(os.path.join("..", data_folder, "zajęcia.xlsx"))
+    dyspozycyjnosc = wczytaj_dyspozycyjnosc(os.path.join("..", data_folder, "grafik.xlsx"))
+    rozklad_miesiac = wczytaj_rozklad_zajec_miesiac(os.path.join("..", data_folder, "zajęcia.xlsx"), os.path.join("..", "data", "grafik.xlsx"))
     print("Wgrano pliki wejsciowe")
     '''Walidacja poprawności wgranych plików'''
     print('Waliduję przesłane pliki...')
@@ -59,5 +64,6 @@ def pipeline():
     # Wyświetl statystyki
     print(f"\nOsiągnięte fitness: {fitness(najlepszy_harmonogram, id_pracownikow)}")
     print(f"Liczba pokoleń: {pokolenie}")
+
 if __name__ == "__main__":
     pipeline()
