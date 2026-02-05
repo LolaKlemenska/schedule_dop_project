@@ -15,7 +15,8 @@ def pipeline():
     umiejetnosci = wczytaj_umiejetnosci(os.path.join("..", data_folder, "znajomosc_zajec.xlsx"))
     rozklad_zajec_miesiac = wczytaj_rozklad_zajec(os.path.join("..", data_folder, "zajęcia.xlsx"))
     dyspozycyjnosc = wczytaj_dyspozycyjnosc(os.path.join("..", data_folder, "grafik.xlsx"))
-    rozklad_miesiac = wczytaj_rozklad_zajec_miesiac(os.path.join("..", data_folder, "zajęcia.xlsx"), os.path.join("..", "data", "grafik.xlsx"))
+    kalendarz = wczytaj_kalendarz(os.path.join("..", data_folder, "grafik.xlsx"))
+    rozklad_miesiac = wczytaj_rozklad_zajec_miesiac(os.path.join("..", data_folder, "zajęcia.xlsx"), os.path.join("..", data_folder, "grafik.xlsx"))
     print("Wgrano pliki wejsciowe")
     '''Walidacja poprawności wgranych plików'''
     print('Waliduję przesłane pliki...')
