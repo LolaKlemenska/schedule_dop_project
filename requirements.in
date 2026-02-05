@@ -6,4 +6,4 @@ pip<26
 setuptools
 wheel
 pip-tools
-dvc
+dvc[ssh]
