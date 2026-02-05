@@ -2,3 +2,8 @@ pandas
 numpy
 openpyxl
 pytest
+pip<26
+setuptools
+wheel
+pip-tools
+dvc

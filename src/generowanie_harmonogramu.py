@@ -164,6 +164,7 @@ def sprawdz_zajetosci(osobnik: Osobnik, rozklad: list[dict]) -> dict:
     zajetosci = defaultdict(set)
     for (prow, asys), zajecia in zip(osobnik, rozklad):
         slot = (zajecia['dzien_miesiaca'], zajecia['czas'])
+        _ = zajetosci[slot]
         if prow != -1:
             zajetosci[slot].add(prow)
         if asys != -1:
