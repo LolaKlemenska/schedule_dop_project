@@ -143,10 +143,15 @@ def fitness(osobnik: Osobnik, id_pracownikow: list):
 
     return fitness
 
-def selekcja_pary(populacja: Populacja, id_pracownikow: list) -> list[Osobnik]:
+def selekcja_pary(populacja: list, id_pracownikow: list) -> list:
+    fitnessy = [fitness(osobnik, id_pracownikow) for osobnik in populacja]
+    min_f = min(fitnessy)
+    # przesuwamy tak, aby wszystkie wagi były dodatnie
+    wagi = [f - min_f + 1 for f in fitnessy]
+
     return random.choices(
         population=populacja,
-        weights=[fitness(osobnik, id_pracownikow) for osobnik in populacja],
+        weights=wagi,
         k=2
     )
 
@@ -160,10 +165,11 @@ def crossover(osobnik1: Osobnik, osobnik2: Osobnik) -> tuple[Osobnik, Osobnik]:
     p = random.randint(1, length - 1)
     return osobnik1[0:p] + osobnik2[p:], osobnik2[0:p] + osobnik1[p:]
 
-def sprawdz_zajetosci(osobnik: Osobnik, rozklad: list[dict]) -> dict:
+def sprawdz_zajetosci(osobnik, rozklad):
     zajetosci = defaultdict(set)
     for (prow, asys), zajecia in zip(osobnik, rozklad):
         slot = (zajecia['dzien_miesiaca'], zajecia['czas'])
+        # zawsze tworzę pusty set dla slotu
         _ = zajetosci[slot]
         if prow != -1:
             zajetosci[slot].add(prow)
